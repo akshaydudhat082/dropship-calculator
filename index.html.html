@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dropshipping Profit Calculator</title>
+<style>
+  :root{
+    --navy:#1f4e78;
+    --navy-dark:#163a5c;
+    --green:#0f8a3f;
+    --green-bg:#e8f7ee;
+    --yellow-bg:#fff8e1;
+    --border:#d7dde5;
+    --text:#1b2733;
+    --muted:#5c6b7a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#eef2f6;
+    color:var(--text);
+    padding:24px;
+  }
+  .wrap{
+    max-width:820px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(0,0,0,0.08);
+  }
+  .header{
+    background:linear-gradient(135deg,var(--navy),var(--navy-dark));
+    color:#fff;
+    padding:20px 24px;
+    text-align:center;
+  }
+  .header h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:0.5px;
+  }
+  .body{
+    padding:22px 24px 26px;
+  }
+  .section-title{
+    background:#dde6f3;
+    color:var(--navy-dark);
+    font-weight:bold;
+    font-size:13px;
+    letter-spacing:0.4px;
+    padding:8px 12px;
+    border-radius:6px;
+    margin:18px 0 10px;
+    text-transform:uppercase;
+  }
+  .section-title:first-of-type{margin-top:0;}
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 20px;
+  }
+  @media(max-width:600px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .field label{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .field input{
+    background:var(--yellow-bg);
+    border:1px solid #e8d78a;
+    color:#0000FF;
+    font-weight:600;
+    font-size:15px;
+    padding:8px 10px;
+    border-radius:6px;
+    outline:none;
+    width:100%;
+  }
+  .field input:focus{
+    border-color:var(--navy);
+  }
+  .rows{
+    display:flex;
+    flex-direction:column;
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .row{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 14px;
+    font-size:14px;
+    border-bottom:1px solid var(--border);
+    background:#fafcfe;
+  }
+  .row:last-child{border-bottom:none;}
+  .row .label{color:var(--text);}
+  .row .val{font-weight:700;color:#000;}
+  .row.neg .val{color:#c0392b;}
+  .profit-box{
+    margin-top:16px;
+    background:var(--green-bg);
+    border:1px solid #b7e3c6;
+    border-radius:8px;
+    padding:16px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .profit-box .label{
+    font-weight:700;
+    font-size:15px;
+    color:var(--navy-dark);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+  .profit-box .value{
+    font-size:26px;
+    font-weight:800;
+    color:var(--green);
+  }
+  .subrow{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 2px 0;
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .subrow span:last-child{font-weight:700;color:var(--text);}
+  .note{
+    margin-top:14px;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Dropshipping Profit Calculator</h1>
+  </div>
+  <div class="body">
+
+    <div class="section-title">Inputs</div>
+    <div class="grid">
+      <div class="field">
+        <label>Product Source Cost (₹)</label>
+        <input type="number" id="sourceCost" value="150">
+      </div>
+      <div class="field">
+        <label>Selling Price (₹)</label>
+        <input type="number" id="sellingPrice" value="599">
+      </div>
+      <div class="field">
+        <label>Total Orders</label>
+        <input type="number" id="totalOrders" value="1700">
+      </div>
+      <div class="field">
+        <label>Order Cancel Rate (%)</label>
+        <input type="number" id="cancelRate" value="0">
+      </div>
+      <div class="field">
+        <label>Ad Cost per Order (₹)</label>
+        <input type="number" id="adCost" value="65">
+      </div>
+      <div class="field">
+        <label>RTO Percentage (%)</label>
+        <input type="number" id="rtoPct" value="60">
+      </div>
+      <div class="field">
+        <label>RTO Cost per Order (₹) <span id="rtoCostLive" style="color:var(--green);font-weight:800;">₹65</span></label>
+        <input type="number" id="rtoCost" value="65">
+        <input type="range" id="rtoCostSlider" min="0" max="200" step="1" value="65" style="width:100%;margin-top:4px;accent-color:var(--navy);">
+      </div>
+    </div>
+
+    <div class="section-title">Order Flow</div>
+    <div class="rows">
+      <div class="row"><span class="label">After Cancellation Orders</span><span class="val" id="afterCancel">-</span></div>
+      <div class="row"><span class="label">RTO Orders</span><span class="val" id="rtoOrders">-</span></div>
+      <div class="row"><span class="label">Delivered Orders</span><span class="val" id="deliveredOrders">-</span></div>
+    </div>
+
+    <div class="section-title">Cost Breakdown</div>
+    <div class="rows">
+      <div class="row"><span class="label">Total Ad Cost</span><span class="val" id="totalAdCost">-</span></div>
+      <div class="row"><span class="label">Total RTO Cost</span><span class="val" id="totalRtoCost">-</span></div>
+      <div class="row"><span class="label">Average Ad Cost / Delivered Order</span><span class="val" id="avgAdCost">-</span></div>
+      <div class="row"><span class="label">Margin per Order</span><span class="val" id="marginPerOrder">-</span></div>
+      <div class="row"><span class="label">Total Margin (Delivered × Margin)</span><span class="val" id="totalMargin">-</span></div>
+      <div class="row neg"><span class="label">Less: Total Ad Cost</span><span class="val" id="lessAd">-</span></div>
+      <div class="row neg"><span class="label">Less: Total RTO Cost</span><span class="val" id="lessRto">-</span></div>
+    </div>
+
+    <div class="profit-box">
+      <span class="label">Net Profit</span>
+      <span class="value" id="netProfit">₹0</span>
+    </div>
+    <div class="subrow"><span>Net Profit per Order</span><span id="profitPerOrder">₹0</span></div>
+    <div class="subrow"><span>Net Profit Margin %</span><span id="profitMarginPct">0%</span></div>
+
+    <div class="section-title">RTO Cost Sensitivity (live)</div>
+    <div class="rows" id="sensitivityTable"></div>
+
+    <div class="note">
+      Delivered Orders = (Total Orders − Cancelled) × (1 − RTO%). Ad cost is charged on every order placed; RTO cost is charged only on orders that come back. Margin and revenue are earned only on Delivered Orders. The sensitivity table shows Net Profit if RTO cost per order were each of the values below, with everything else held at your current inputs — the row matching your current RTO cost is highlighted.
+    </div>
+  </div>
+</div>
+
+<script>
+function fmtCurrency(n){
+  if(!isFinite(n)) n = 0;
+  const neg = n < 0;
+  n = Math.abs(n);
+  const s = '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:2});
+  return neg ? '(' + s + ')' : s;
+}
+function fmtNum(n){
+  if(!isFinite(n)) n = 0;
+  return n.toLocaleString('en-IN', {maximumFractionDigits:0});
+}
+
+function computeNetProfit(sourceCost, sellingPrice, totalOrders, cancelRate, adCost, rtoPct, rtoCost){
+  const afterCancel = totalOrders - (totalOrders * cancelRate);
+  const rtoOrders = afterCancel * rtoPct;
+  const deliveredOrders = afterCancel - rtoOrders;
+  const totalAdCost = adCost * totalOrders;
+  const totalRtoCost = rtoOrders * rtoCost;
+  const marginPerOrder = sellingPrice - sourceCost;
+  const totalMargin = deliveredOrders * marginPerOrder;
+  return totalMargin - totalAdCost - totalRtoCost;
+}
+
+function renderSensitivity(sourceCost, sellingPrice, totalOrders, cancelRate, adCost, rtoPct, currentRtoCost){
+  const steps = [];
+  const base = Math.round(currentRtoCost / 5) * 5;
+  for(let i=-3;i<=3;i++){
+    let v = base + (i*10);
+    if(v < 0) v = 0;
+    steps.push(v);
+  }
+  const uniqueSteps = [...new Set(steps)].sort((a,b)=>a-b);
+  const container = document.getElementById('sensitivityTable');
+  container.innerHTML = '';
+  uniqueSteps.forEach(v=>{
+    const np = computeNetProfit(sourceCost, sellingPrice, totalOrders, cancelRate, adCost, rtoPct, v);
+    const row = document.createElement('div');
+    row.className = 'row' + (v === Math.round(currentRtoCost) ? '' : '');
+    const isCurrent = v === Math.round(currentRtoCost);
+    row.style.background = isCurrent ? '#e8f7ee' : '';
+    row.style.fontWeight = isCurrent ? '700' : '400';
+    row.innerHTML = `<span class="label">${isCurrent ? '➤ ' : ''}RTO Cost ₹${fmtNum(v)}</span><span class="val" style="color:${np>=0 ? '#0f8a3f' : '#c0392b'}">${fmtCurrency(np)}</span>`;
+    container.appendChild(row);
+  });
+}
+
+function calculate(){
+  const sourceCost = parseFloat(document.getElementById('sourceCost').value) || 0;
+  const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+  const totalOrders = parseFloat(document.getElementById('totalOrders').value) || 0;
+  const cancelRate = (parseFloat(document.getElementById('cancelRate').value) || 0) / 100;
+  const adCost = parseFloat(document.getElementById('adCost').value) || 0;
+  const rtoPct = (parseFloat(document.getElementById('rtoPct').value) || 0) / 100;
+  const rtoCost = parseFloat(document.getElementById('rtoCost').value) || 0;
+
+  document.getElementById('rtoCostLive').textContent = '₹' + fmtNum(rtoCost);
+
+  const afterCancel = totalOrders - (totalOrders * cancelRate);
+  const rtoOrders = afterCancel * rtoPct;
+  const deliveredOrders = afterCancel - rtoOrders;
+
+  const totalAdCost = adCost * totalOrders;
+  const totalRtoCost = rtoOrders * rtoCost;
+  const avgAdCost = deliveredOrders > 0 ? totalAdCost / deliveredOrders : 0;
+
+  const marginPerOrder = sellingPrice - sourceCost;
+  const totalMargin = deliveredOrders * marginPerOrder;
+
+  const netProfit = totalMargin - totalAdCost - totalRtoCost;
+  const profitPerOrder = totalOrders > 0 ? netProfit / totalOrders : 0;
+  const revenueBase = sellingPrice * deliveredOrders;
+  const profitMarginPct = revenueBase !== 0 ? (netProfit / revenueBase) * 100 : 0;
+
+  renderSensitivity(sourceCost, sellingPrice, totalOrders, cancelRate, adCost, rtoPct, rtoCost);
+
+  document.getElementById('afterCancel').textContent = fmtNum(afterCancel);
+  document.getElementById('rtoOrders').textContent = fmtNum(rtoOrders);
+  document.getElementById('deliveredOrders').textContent = fmtNum(deliveredOrders);
+
+  document.getElementById('totalAdCost').textContent = fmtCurrency(totalAdCost);
+  document.getElementById('totalRtoCost').textContent = fmtCurrency(totalRtoCost);
+  document.getElementById('avgAdCost').textContent = fmtCurrency(avgAdCost);
+  document.getElementById('marginPerOrder').textContent = fmtCurrency(marginPerOrder);
+  document.getElementById('totalMargin').textContent = fmtCurrency(totalMargin);
+  document.getElementById('lessAd').textContent = '-' + fmtCurrency(totalAdCost);
+  document.getElementById('lessRto').textContent = '-' + fmtCurrency(totalRtoCost);
+
+  const netProfitEl = document.getElementById('netProfit');
+  netProfitEl.textContent = fmtCurrency(netProfit);
+  netProfitEl.style.color = netProfit >= 0 ? '#0f8a3f' : '#c0392b';
+
+  document.getElementById('profitPerOrder').textContent = fmtCurrency(profitPerOrder);
+  document.getElementById('profitMarginPct').textContent = profitMarginPct.toFixed(1) + '%';
+}
+
+const rtoCostInput = document.getElementById('rtoCost');
+const rtoCostSlider = document.getElementById('rtoCostSlider');
+rtoCostInput.addEventListener('input', () => {
+  rtoCostSlider.value = rtoCostInput.value;
+  calculate();
+});
+rtoCostSlider.addEventListener('input', () => {
+  rtoCostInput.value = rtoCostSlider.value;
+  calculate();
+});
+
+document.querySelectorAll('input:not(#rtoCost):not(#rtoCostSlider)').forEach(el => el.addEventListener('input', calculate));
+calculate();
+</script>
+</body>
+</html>
